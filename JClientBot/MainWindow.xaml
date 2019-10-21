@@ -1,0 +1,46 @@
+﻿<Window x:Class="JClientBot.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:JClientBot"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="830">
+    <Window.Resources>
+        <local:ClientList x:Key="MyListKey" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Label x:Name="ID_Label" Content="ID" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <TextBox x:Name="ID_Text" TextWrapping="Wrap" Text="Test" VerticalAlignment="Center" Width="150" Margin="10,0,0,0"/>
+            <Label x:Name="Count_Label" Content="Count" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <TextBox x:Name="Count_Text" TextWrapping="Wrap" Text="10" VerticalAlignment="Center" Width="150" Margin="10,0,0,0" PreviewTextInput="Count_Text_PreviewTextInput"/>
+            <Button x:Name="Login_Button" Content="Login" Width="75" Margin="20,0,0,0" VerticalAlignment="Center" Click="ID_Button_Click"/>
+            <Button x:Name="Logout_Button" Content="Logout" Width="75" Margin="20,0,0,0" VerticalAlignment="Center" Click="Logout_Button_Click"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Label x:Name="Chat_Label" Content="ID" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <TextBox x:Name="Chat_Text" TextWrapping="Wrap" Text="Test" VerticalAlignment="Center" Width="300" Margin="10,0,0,0"/>
+            <Button x:Name="Chat_Button" Content="Chat" Width="75" Margin="10,0,0,0" VerticalAlignment="Center" Click="Chat_Button_Click"/>
+        </StackPanel>
+        <ListView Grid.Row="2" x:Name="listBox" ItemsSource="{Binding Source={StaticResource MyListKey}}">
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridViewColumn CellTemplate="{StaticResource FirstCell}" Width="30"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Name" Width="80" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=SendMessage}" Header="Send" Width="160" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=RecvMessage}" Header="Recv" Width="160" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Error}" Header="Error" Width="130" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Chat}" Header="Chat" Width="180" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=ChatCount}" Header="Count" Width="40" />
+                </GridView>
+            </ListView.View>
+
+        </ListView>
+    </Grid>
+</Window>
