@@ -43,15 +43,14 @@ void JSession::PostSend(const bool isImmediately, const size_t size, char* data)
 		{
 			std::lock_guard<std::mutex> lock(m_mutexSendQueue);
 			m_sendDataQueue.push(sendData);
+			if (m_sendDataQueue.size() > 1)
+				return;
 		}
 	}
 	else
 	{
 		sendData = data;
 	}
-
-	if (!isImmediately && m_sendDataQueue.size() > 1)
-		return;
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(sendData, size),
 		boost::bind(&JSession::handle_write, this,
@@ -62,6 +61,19 @@ void JSession::PostSend(const bool isImmediately, const size_t size, char* data)
 
 void JSession::handle_write(const boost::system::error_code& error, size_t bytes_transferred)
 {
+	if (error)
+	{
+		if (error == boost::asio::error::eof)
+		{
+			JLogger.Log("handle_write : 연결이 끊어졌습니다.");
+		}
+		else
+		{
+			JLogger.Error("handle_write : error No : %d, error Msg : %s", error.value(), error.message().c_str());
+		}
+		m_isDisconnected = true;
+		return;
+	}
 	char* pData = nullptr;
 	{
 		std::lock_guard<std::mutex> lock(m_mutexSendQueue);
@@ -159,27 +171,27 @@ void JSession::handle_read(const boost::system::error_code& error, size_t bytes_
 		}
 		else
 		{
-			JLogger.Error("handle_read : error No : %d, error Msg : %s", error.value(), error.message());
+			JLogger.Error("handle_read : error No : %d, error Msg : %s", error.value(), error.message().c_str());
 		}
 		m_isDisconnected = true;
+		return;
 	}
-	else
-	{
-		{
-			//m_packetRecvBufferMark에 채워진 패킷을 처리하기 전에 다시 불려서 
-			//남은 공간이 모자르면, m_packetRecvBuffer 크기를 늘려주자 (최대한 늘리지 않아야한다.)
-			size_t afterSize = m_packetRecvBufferMark + bytes_transferred;
-			while (m_isUsingRecvBuffer.test_and_set(std::memory_order_acquire));
-			if (afterSize > m_packetRecvBufferSize)
-			{
-				m_packetRecvBuffer = ResizeBuffer(m_packetRecvBuffer, m_packetRecvBufferSize, m_packetRecvBufferSize * 2);
-				m_packetRecvBufferSize *= 2;
-			}
 
-			memcpy(&m_packetRecvBuffer[m_packetRecvBufferMark], m_receiveBuffer.data(), bytes_transferred);
-			m_packetRecvBufferMark = (int)afterSize;
-			m_isUsingRecvBuffer.clear(std::memory_order_release);
+	//m_isUsingRecvBuffer lock
+	{
+		//m_packetRecvBufferMark에 채워진 패킷을 처리하기 전에 다시 불려서 
+		//남은 공간이 모자르면, m_packetRecvBuffer 크기를 늘려주자 (최대한 늘리지 않아야한다.)
+		size_t afterSize = m_packetRecvBufferMark + bytes_transferred;
+		while (m_isUsingRecvBuffer.test_and_set(std::memory_order_acquire));
+		if (afterSize > m_packetRecvBufferSize)
+		{
+			m_packetRecvBuffer = ResizeBuffer(m_packetRecvBuffer, m_packetRecvBufferSize, m_packetRecvBufferSize * 2);
+			m_packetRecvBufferSize *= 2;
 		}
-		PostReceive();
+
+		memcpy(&m_packetRecvBuffer[m_packetRecvBufferMark], m_receiveBuffer.data(), bytes_transferred);
+		m_packetRecvBufferMark = (int)afterSize;
+		m_isUsingRecvBuffer.clear(std::memory_order_release);
 	}
+	PostReceive();
 }
