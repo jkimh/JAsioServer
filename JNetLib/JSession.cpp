@@ -91,7 +91,10 @@ bool JSession::ProcessPacket(std::function<bool(PACKET_HEADER*)> packetProcess)
 	//lock을 최소화 하기 위해 버퍼를 하나 더 두어 복사한다.
 	{
 		int remainBufSize = (int)m_packetRecvProcessBuffer.size() - m_packetRecvProcessBufferMark - 1;
-		std::lock_guard<std::mutex> lock(m_mutexRecvBuffer);
+		if (m_isUsingRecvBuffer.test_and_set(std::memory_order_acquire))
+		{
+			return true;
+		}
 		//m_packetRecvBuffer 의 경우 크기를 늘리는 로직이 있기 때문에 더 커질 가능성이 있음. 
 		//이러한 경우는 같이 버퍼 크기를 늘리지는 않고, m_packetRecvBufferUsingLogicThread 크기만큼만 처리하도록 함.
 		if (remainBufSize < m_packetRecvBufferMark)
@@ -111,6 +114,7 @@ bool JSession::ProcessPacket(std::function<bool(PACKET_HEADER*)> packetProcess)
 			copySize = m_packetRecvBufferMark;
 			m_packetRecvBufferMark = 0;
 		}
+		m_isUsingRecvBuffer.clear(std::memory_order_release);
 	}
 
 	size_t remainPacketData = m_packetRecvProcessBufferMark + copySize;
@@ -165,14 +169,16 @@ void JSession::handle_read(const boost::system::error_code& error, size_t bytes_
 			//m_packetRecvBufferMark에 채워진 패킷을 처리하기 전에 다시 불려서 
 			//남은 공간이 모자르면, m_packetRecvBuffer 크기를 늘려주자 (최대한 늘리지 않아야한다.)
 			size_t afterSize = m_packetRecvBufferMark + bytes_transferred;
-			std::lock_guard<std::mutex> lock(m_mutexRecvBuffer);
+			while (m_isUsingRecvBuffer.test_and_set(std::memory_order_acquire));
 			if (afterSize > m_packetRecvBufferSize)
 			{
 				m_packetRecvBuffer = ResizeBuffer(m_packetRecvBuffer, m_packetRecvBufferSize, m_packetRecvBufferSize * 2);
 				m_packetRecvBufferSize *= 2;
 			}
+
 			memcpy(&m_packetRecvBuffer[m_packetRecvBufferMark], m_receiveBuffer.data(), bytes_transferred);
 			m_packetRecvBufferMark = (int)afterSize;
+			m_isUsingRecvBuffer.clear(std::memory_order_release);
 		}
 		PostReceive();
 	}
