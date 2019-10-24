@@ -4,7 +4,6 @@
 #include "JSession.h"
 #include <functional>
 #include "JLogger.h"
-#include "JReplaySaveWorker.h"
 
 JCommander::JCommander(const std::shared_ptr<JSession>& session, std::shared_ptr<JServer>& server)
 	: m_session(session), m_server(server), m_isLogout(false)
@@ -66,7 +65,7 @@ void JCommander::OnPacket(PKS_CS_LOGIN* packet)
 	PKS_SC_LOGIN_ACK ack;
 	ack.command = PACKET_COMMAND::PACKET_SC_LOGIN_ACK;
 	ack.size = sizeof(PKS_SC_LOGIN_ACK);
-	auto packetPtr = std::make_shared<PACKET_HEADER>(ack);
+	auto packetPtr = std::dynamic_pointer_cast<PACKET_HEADER>(std::make_shared<PKS_SC_LOGIN_ACK>(ack));
 	Send(packetPtr);
 }
 void JCommander::OnPacket(PKS_CS_LOGOUT* packet)
@@ -87,7 +86,7 @@ void JCommander::OnPacket(PKS_CS_CHAT* packet)
 		ack.command = PACKET_COMMAND::PACKET_SC_CHAT;
 		ack.size = sizeof(PKS_SC_CHAT);
 		strcpy_s(ack.chat, packet->chat);
-		auto packetPtr = std::make_shared<PACKET_HEADER>(ack);
+		auto packetPtr = std::dynamic_pointer_cast<PACKET_HEADER>(std::make_shared<PKS_SC_CHAT>(ack));
 		m_serverPtr->BroadCastToCommander(packetPtr);
 	}
 	
