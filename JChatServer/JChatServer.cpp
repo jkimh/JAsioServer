@@ -6,13 +6,33 @@
 #include "JLogger.h"
 
 using boost::asio::ip::tcp;
+void ServerLogicThread(JServer* server);
 int main()
 {
 	JLogger.Init("Server", "Log_Server", true);
-	boost::asio::io_context ioContext;
-	JServer server(ioContext, 9001);
-	std::thread thread(boost::bind(&boost::asio::io_context::run, &ioContext));
 
+	boost::asio::io_context ioContext;
+	std::unique_ptr<JServer> server = std::make_unique<JServer>(ioContext, 9001);
+	std::thread constextThread(boost::bind(&boost::asio::io_context::run, &ioContext));
+	std::thread serverThread(std::bind(&ServerLogicThread, server.get()));
+
+	double delta = 0;
+	while (1)
+	{
+		char temp[100];
+		std::cin >> temp;
+
+		if (0 == strncmp(temp, "end", 100))
+		{
+			serverThread.detach();
+			constextThread.detach();
+			break;
+		}
+	}
+}
+
+void ServerLogicThread(JServer* server)
+{
 	UINT64 lastTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	double nsPerTick = 1000000000 / 12.0f; // 12ÇÁ·¹ÀÓ
 
@@ -21,7 +41,6 @@ int main()
 	int tickCount = 0;
 
 	//UINT64 lastTimer = lastTime;
-
 	double delta = 0;
 	while (1)
 	{
@@ -33,9 +52,9 @@ int main()
 			ticks++;
 			tickCount++;
 
-			server.PreUpdateCommanders();
-			server.ProcessPacket();
-			server.UpdateCommanders();
+			server->PreUpdateCommanders();
+			server->ProcessPacket();
+			server->UpdateCommanders();
 
 			delta--;
 		}

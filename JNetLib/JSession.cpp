@@ -17,7 +17,6 @@ JSession::~JSession()
 	delete[] m_packetRecvBuffer;
 	while (!m_sendDataQueue.empty())
 	{
-		delete[] m_sendDataQueue.front();
 		m_sendDataQueue.pop();
 	}
 	JLogger.Log("JSession destory");
@@ -33,26 +32,19 @@ void JSession::PostReceive()
 			boost::asio::placeholders::bytes_transferred));
 }
 
-void JSession::PostSend(const bool isImmediately, const size_t size, char* data)
+void JSession::PostSend(const bool isImmediately, const size_t size, std::shared_ptr<PACKET_HEADER>& data)
 {
-	char* sendData = nullptr;
 	if (!isImmediately)
 	{
-		sendData = new char[size];
-		memcpy_s(sendData, size, data, size);
-		{
-			std::lock_guard<std::mutex> lock(m_mutexSendQueue);
-			m_sendDataQueue.push(sendData);
-			if (m_sendDataQueue.size() > 1)
-				return;
-		}
+		std::lock_guard<std::mutex> lock(m_mutexSendQueue);
+		m_sendDataQueue.push(data);
+		if (m_sendDataQueue.size() > 1)
+			return;
 	}
 	else
 	{
-		sendData = data;
 	}
-
-	boost::asio::async_write(m_socket, boost::asio::buffer(sendData, size),
+	boost::asio::async_write(m_socket, boost::asio::buffer((char*)data.get(), size),
 		boost::bind(&JSession::handle_write, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred)
@@ -71,21 +63,18 @@ void JSession::handle_write(const boost::system::error_code& error, size_t bytes
 		{
 			JLogger.Error("handle_write : error No : %d, error Msg : %s", error.value(), error.message().c_str());
 		}
-		m_isDisconnected = true;
+		m_isDisconnected = true; //todo : 서버 종료 시 세션이 먼저 파괴되어 표시가 되지 않음
 		return;
 	}
-	char* pData = nullptr;
 	{
 		std::lock_guard<std::mutex> lock(m_mutexSendQueue);
-		delete[] m_sendDataQueue.front();
 		m_sendDataQueue.pop();
 		if (m_sendDataQueue.empty())
 			return;
-		pData = m_sendDataQueue.front();
 	}
-
-	PACKET_HEADER* pHeader = (PACKET_HEADER*)pData;
-	PostSend(true, pHeader->size, pData);
+	auto &dataPtr = m_sendDataQueue.front();
+	PACKET_HEADER* pHeader = reinterpret_cast<PACKET_HEADER*>(dataPtr.get());
+	PostSend(true, pHeader->size, m_sendDataQueue.front());
 }
 
 char* JSession::ResizeBuffer(char* buffer, size_t beforeSize, size_t afterSize)

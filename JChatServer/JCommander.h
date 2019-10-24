@@ -5,13 +5,13 @@ class JSession;
 class JCommander
 {
 public:
-	JCommander(const std::shared_ptr<JSession>& session, JServer* server);
+	JCommander(const std::shared_ptr<JSession>& session, std::shared_ptr<JServer>& server);
 	~JCommander(); 
 	void Init(const char* name);
 	void ProcessPacket();
 	void Update();
 	bool ProcessPacket(PACKET_HEADER* data);
-	void Send(PACKET_HEADER* packet);
+	void Send(std::shared_ptr<PACKET_HEADER>& packet);
 	bool IsReadyDie();
 	bool IsDisConnected();
 	void Close();
@@ -23,7 +23,7 @@ private:
 
 private:
 	std::shared_ptr<JSession> m_session;
-	JServer* m_server;
+	std::weak_ptr<JServer> m_server;
 	std::string m_commanderName;
 	bool m_isLogout;
 };

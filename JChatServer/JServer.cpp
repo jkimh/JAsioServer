@@ -83,7 +83,7 @@ void JServer::UpdateCommanders()
 		}
 	}
 }
-void JServer::BroadCastToCommander(PACKET_HEADER* packet)
+void JServer::BroadCastToCommander(std::shared_ptr<PACKET_HEADER>& packet)
 {
 	for (auto commander : m_commanders)
 	{
@@ -97,7 +97,8 @@ void JServer::handle_accept(const std::shared_ptr<JSession>& session, const boos
 		session->PostReceive();		
 		{
 			while (m_isUsingPreCommanders.test_and_set(std::memory_order_acquire));
-			m_preCommanders.push_back(std::make_shared<JCommander>(session, this));
+			auto this_sharedPtr = shared_from_this();
+			m_preCommanders.push_back(std::make_shared<JCommander>(session, this_sharedPtr));
 			m_isUsingPreCommanders.clear(std::memory_order_release);
 		}
 	}

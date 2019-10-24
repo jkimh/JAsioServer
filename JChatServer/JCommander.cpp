@@ -4,8 +4,9 @@
 #include "JSession.h"
 #include <functional>
 #include "JLogger.h"
+#include "JReplaySaveWorker.h"
 
-JCommander::JCommander(const std::shared_ptr<JSession>& session, JServer* server)
+JCommander::JCommander(const std::shared_ptr<JSession>& session, std::shared_ptr<JServer>& server)
 	: m_session(session), m_server(server), m_isLogout(false)
 {
 }
@@ -26,9 +27,9 @@ void JCommander::Update()
 	
 }
 
-void JCommander::Send(PACKET_HEADER* packet)
+void JCommander::Send(std::shared_ptr<PACKET_HEADER>& packet)
 {
-	m_session->PostSend(false, packet->size, (char*) packet);
+	m_session->PostSend(false, packet->size, packet);
 }
 
 void JCommander::ProcessPacket()
@@ -65,7 +66,8 @@ void JCommander::OnPacket(PKS_CS_LOGIN* packet)
 	PKS_SC_LOGIN_ACK ack;
 	ack.command = PACKET_COMMAND::PACKET_SC_LOGIN_ACK;
 	ack.size = sizeof(PKS_SC_LOGIN_ACK);
-	Send(&ack);
+	auto packetPtr = std::make_shared<PACKET_HEADER>(ack);
+	Send(packetPtr);
 }
 void JCommander::OnPacket(PKS_CS_LOGOUT* packet)
 {
@@ -78,11 +80,17 @@ void JCommander::OnPacket(PKS_CS_LOGOUT* packet)
 void JCommander::OnPacket(PKS_CS_CHAT* packet)
 {
 	JLogger.Log("Chat : %s", packet->chat);
-	PKS_SC_CHAT ack;
-	ack.command = PACKET_COMMAND::PACKET_SC_CHAT;
-	ack.size = sizeof(PKS_SC_CHAT);
-	strcpy_s(ack.chat, packet->chat);
-	m_server->BroadCastToCommander(&ack);
+	auto m_serverPtr = m_server.lock();
+	if (m_serverPtr)
+	{
+		PKS_SC_CHAT ack;
+		ack.command = PACKET_COMMAND::PACKET_SC_CHAT;
+		ack.size = sizeof(PKS_SC_CHAT);
+		strcpy_s(ack.chat, packet->chat);
+		auto packetPtr = std::make_shared<PACKET_HEADER>(ack);
+		m_serverPtr->BroadCastToCommander(packetPtr);
+	}
+	
 }
 
 void JCommander::Close()

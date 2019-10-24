@@ -6,7 +6,7 @@
 using boost::asio::ip::tcp;
 class JSession;
 class JCommander;
-class JServer
+class JServer : public std::enable_shared_from_this<JServer>
 {
 public:
 	JServer(boost::asio::io_context& io_context, short port);
@@ -15,7 +15,7 @@ public:
 	void ProcessPacket();
 	void UpdateCommanders();
 	void PreUpdateCommanders();
-	void BroadCastToCommander(PACKET_HEADER* packet);
+	void BroadCastToCommander(std::shared_ptr<PACKET_HEADER>& packet);
 private:
 	void handle_accept(const std::shared_ptr<JSession>& session, const boost::system::error_code& error);
 
