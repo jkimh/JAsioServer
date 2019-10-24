@@ -6,15 +6,15 @@
 #include "JLogger.h"
 
 using boost::asio::ip::tcp;
-void ServerLogicThread(JServer* server);
+void ServerLogicThread(std::shared_ptr<JServer>& server);
 int main()
 {
 	JLogger.Init("Server", "Log_Server", true);
 
 	boost::asio::io_context ioContext;
-	std::unique_ptr<JServer> server = std::make_unique<JServer>(ioContext, 9001);
+	std::shared_ptr<JServer> server = std::make_shared<JServer>(ioContext, 9001);
 	std::thread constextThread(boost::bind(&boost::asio::io_context::run, &ioContext));
-	std::thread serverThread(std::bind(&ServerLogicThread, server.get()));
+	std::thread serverThread(std::bind(&ServerLogicThread, server));
 
 	double delta = 0;
 	while (1)
@@ -31,7 +31,7 @@ int main()
 	}
 }
 
-void ServerLogicThread(JServer* server)
+void ServerLogicThread(std::shared_ptr<JServer>& server)
 {
 	UINT64 lastTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	double nsPerTick = 1000000000 / 12.0f; // 12ÇÁ·¹ÀÓ
@@ -78,14 +78,3 @@ void ServerLogicThread(JServer* server)
 	}
 }
 
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
