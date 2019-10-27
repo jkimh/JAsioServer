@@ -19,6 +19,9 @@
 #include <thread>
 #include <mutex>
 #include <array>
+#include <vector>
+#include <string>
+#include <optional>
 
 
 // reference additional headers your program requires here

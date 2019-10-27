@@ -4,8 +4,8 @@
 #include "JLogger.h"
 
 
-JSession::JSession(boost::asio::io_context& io_context)
-	: m_socket(io_context), m_packetRecvBufferMark(0), m_packetRecvProcessBufferMark(0), m_isDisconnected(false),
+JSession::JSession(boost::asio::io_context& io_context, const uint32_t& sessionID)
+	: m_socket(io_context), m_packetRecvBufferMark(0), m_packetRecvProcessBufferMark(0), m_isDisconnected(false), m_sessionID(sessionID),
 	m_packetRecvBuffer(new char[RECV_BUF_SIZE * 2]),
 	m_packetRecvBufferSize(RECV_BUF_SIZE * 2)
 {
@@ -32,7 +32,7 @@ void JSession::PostReceive()
 			boost::asio::placeholders::bytes_transferred));
 }
 
-void JSession::PostSend(const bool isImmediately, const size_t size, std::shared_ptr<PACKET_HEADER>& data)
+void JSession::PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data)
 {
 	if (!isImmediately)
 	{
@@ -86,7 +86,7 @@ char* JSession::ResizeBuffer(char* buffer, size_t beforeSize, size_t afterSize)
 	return tempBuffer;
 }
 
-bool JSession::ProcessPacket(std::function<bool(PACKET_HEADER*)> packetProcess)
+bool JSession::ProcessPacket(const uint64_t& tickCount, std::function<bool(const uint64_t&, PACKET_HEADER*)> packetProcess)
 {
 	int copySize = 0;
 	//lock을 최소화 하기 위해 버퍼를 하나 더 두어 복사한다.
@@ -129,7 +129,7 @@ bool JSession::ProcessPacket(std::function<bool(PACKET_HEADER*)> packetProcess)
 		PACKET_HEADER* header = (PACKET_HEADER*)&m_packetRecvProcessBuffer[readData];
 		if (header->size <= remainPacketData)
 		{
-			if (!packetProcess(reinterpret_cast<PACKET_HEADER*>(header)))
+			if (!packetProcess(tickCount, reinterpret_cast<PACKET_HEADER*>(header)))
 			{
 				return false;
 			}

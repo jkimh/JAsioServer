@@ -30,12 +30,33 @@
     <ClInclude Include="JPacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JReplaySession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JReplaySaveWorker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ISession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JReplayReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="JSession.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JReplaySession.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JReplaySaveWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JReplayReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

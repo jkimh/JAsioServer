@@ -16,4 +16,6 @@
 #include <deque>
 #include <thread>
 #include <chrono>
+#include <cstring>
+
 #endif //PCH_H

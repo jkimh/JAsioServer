@@ -60,10 +60,10 @@ void JLoggerClass::Log(const char *format, ...)
 	vsprintf_s(buf, format, ap);
 	va_end(ap);
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	char logbuf[MAX_BUF_SIZE];
-	sprintf_s(logbuf, "[LOG][File:%s][Line:%d] %s", GetFuncName().c_str(), GetLine(), buf);
-	std::cout << logbuf << std::endl;
-	//m_fileOut << logbuf;
+	//char logbuf[MAX_BUF_SIZE];
+	//sprintf_s(logbuf, "[LOG][File:%s][Line:%d] %s", GetFuncName().c_str(), GetLine(), buf);
+	std::cout << buf << std::endl;
+	//m_fileOut << logbuf << std::endl;
 }
 
 void JLoggerClass::Error(const char *format, ...)
@@ -76,8 +76,8 @@ void JLoggerClass::Error(const char *format, ...)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 0x000C | FOREGROUND_INTENSITY);
 	char logbuf[MAX_BUF_SIZE];
 	sprintf_s(logbuf, "[ERROR][File:%s][Line:%d] %s", GetFuncName().c_str(), GetLine(), buf);
-	std::cout << logbuf << std::endl;
-	m_fileOut << logbuf;
+	std::cout << buf << std::endl;
+	m_fileOut << logbuf << std::endl;
 }
 
 const std::string& JLoggerClass::GetLogFileName()

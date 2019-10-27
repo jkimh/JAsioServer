@@ -30,4 +30,30 @@ namespace JSharedFunc
 		sprintf_s(fileName, "%s_%s.txt", LogName, GetCurTimeStr().c_str());
 		return fileName;
 	}
+	std::vector<std::string> SplitStringUsingStrTok(std::string_view source, std::string_view token)
+	{
+		std::vector<std::string> result;
+		size_t pos = source.find(token, 0);
+		size_t startPos = 0;
+		size_t tokenSize = token.size();
+		while (pos == std::string::npos)
+		{
+			result.push_back(std::string(source.substr(startPos, pos - startPos)));
+			size_t startPos = pos + tokenSize;
+			pos = source.find(token, startPos);
+		}
+		return result;
+	}
+	std::vector<std::string> SplitString(std::string_view source, char token)
+	{
+		std::vector<std::string> result;
+		std::stringstream sourceStream;
+		sourceStream << source;
+		std::string subString;
+		while (std::getline(sourceStream, subString, token))
+		{
+			result.push_back(subString);
+		}
+		return result;
+	}
 }

@@ -5,7 +5,7 @@
 #include "JLogger.h"
 
 JServer::JServer(boost::asio::io_context & io_context, short port)
-	: m_ioContext(io_context), m_acceptor(io_context, tcp::endpoint(tcp::v4(), port)), m_newSessionID(1)
+	: m_ioContext(io_context), m_acceptor(io_context, tcp::endpoint(tcp::v4(), port)), m_newSessionID(0)
 {
 	m_isUsingPreCommanders.clear();
 	PostAccept();
@@ -17,13 +17,13 @@ JServer::~JServer()
 
 void JServer::PostAccept()
 {
-	std::shared_ptr<JSession> session = std::make_shared<JSession>(m_ioContext);
+	std::shared_ptr<JSession> session = std::make_shared<JSession>(m_ioContext, ++m_newSessionID);
 	m_acceptor.async_accept(session->GetSocket(),
 		boost::bind(&JServer::handle_accept, this, session,
 			boost::asio::placeholders::error));
 }
 
-void JServer::PreUpdateCommanders()
+void JServer::PreUpdateCommanders(uint64_t tickCount)
 {
 	{
 		//한번만 시도해보고 이미 사용중이면 다음 프레임에 진행한다.
@@ -38,24 +38,25 @@ void JServer::PreUpdateCommanders()
 			m_isUsingPreCommanders.clear(std::memory_order_release);
 			return;
 		}
+		//todo : push replayinfo
 		m_commanders.insert(m_commanders.end(), m_preCommanders.begin(), m_preCommanders.end());
 		m_preCommanders.clear();
 		m_isUsingPreCommanders.clear(std::memory_order_release);
 	}
 }
-void JServer::ProcessPacket()
+void JServer::ProcessPacket(uint64_t tickCount)
 {
 	for (auto commander : m_commanders)
 	{
-		commander->ProcessPacket();
+		commander->ProcessPacket(tickCount);
 	}
 }
-void JServer::UpdateCommanders()
+void JServer::UpdateCommanders(uint64_t tickCount)
 {
 	for (auto it = m_commanders.begin(); it != m_commanders.end(); )
 	{
 		auto& commander = *it;
-		if (commander->IsDisConnected())
+		if (commander->IsDisConnected() || commander->IsReadyDie())
 		{
 			commander->Close();
 			m_readyDieCommanders.push_back(*it);
@@ -97,8 +98,8 @@ void JServer::handle_accept(const std::shared_ptr<JSession>& session, const boos
 		session->PostReceive();		
 		{
 			while (m_isUsingPreCommanders.test_and_set(std::memory_order_acquire));
-			auto this_sharedPtr = shared_from_this();
-			m_preCommanders.push_back(std::make_shared<JCommander>(session, this_sharedPtr));
+			auto this_sharedPtr(this->shared_from_this());
+			m_preCommanders.push_back(std::make_shared<JCommander>(std::dynamic_pointer_cast<ISession>(session), this_sharedPtr));
 			m_isUsingPreCommanders.clear(std::memory_order_release);
 		}
 	}

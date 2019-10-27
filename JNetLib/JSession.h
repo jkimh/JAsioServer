@@ -6,23 +6,25 @@
 #include <boost/bind.hpp>
 #include <functional>
 #include "JSCPacket.h"
+#include "ISession.h"
 
 using boost::asio::ip::tcp;
 #define RECV_BUF_SIZE 1024
 #define RECV_PROCESS_BUF_SIZE RECV_BUF_SIZE * 4 //패킷 프로세스에서 사용할 버퍼 크기
 
-class JSession
+class JSession : public ISession
 {
 public:
-	JSession(boost::asio::io_context& io_context);
+	JSession(boost::asio::io_context& io_context, const uint32_t& sessionID);
 	~JSession();
 	tcp::socket& GetSocket(){ return m_socket; }
-	bool IsDisconnected() { return m_isDisconnected; }
 	void PostReceive();
 	char* ResizeBuffer(char* buffer, size_t beforeSize, size_t afterSize);
 
-	void PostSend(const bool isImmediately, const size_t size, std::shared_ptr<PACKET_HEADER>& data);
-	bool ProcessPacket(std::function<bool(PACKET_HEADER*)> packetProcess);
+	virtual void PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data) override;
+	virtual bool ProcessPacket(const uint64_t& tickCount, std::function<bool(const uint64_t&, PACKET_HEADER*)> packetProcess) override;
+	virtual bool IsDisconnected() override  { return m_isDisconnected; }
+	virtual uint32_t GetSessionID() override  { return m_sessionID; }
 private:
 	void handle_write(const boost::system::error_code& error, size_t bytes_transferred);
 	void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
@@ -44,4 +46,5 @@ private:
 	std::mutex m_mutexSendQueue;
 
 	bool m_isDisconnected;
+	uint32_t m_sessionID;
 };

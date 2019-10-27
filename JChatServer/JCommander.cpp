@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "JCommander.h"
 #include "JServer.h"
-#include "JSession.h"
+#include "ISession.h"
 #include <functional>
 #include "JLogger.h"
+#include "JReplaySaveWorker.h"
 
-JCommander::JCommander(const std::shared_ptr<JSession>& session, std::shared_ptr<JServer>& server)
+JCommander::JCommander(const std::shared_ptr<ISession>& session, std::shared_ptr<JServer>& server)
 	: m_session(session), m_server(server), m_isLogout(false)
 {
 }
@@ -13,7 +14,7 @@ JCommander::JCommander(const std::shared_ptr<JSession>& session, std::shared_ptr
 
 JCommander::~JCommander()
 {
-	JLogger.Log("Commander destroy : %s", m_commanderName);
+	JLogger.Log("Commander destroy : %s", m_commanderName.c_str());
 }
 
 void JCommander::Init(const char* name)
@@ -31,14 +32,15 @@ void JCommander::Send(std::shared_ptr<PACKET_HEADER>& packet)
 	m_session->PostSend(false, packet->size, packet);
 }
 
-void JCommander::ProcessPacket()
+void JCommander::ProcessPacket(const uint64_t& tickCount)
 {
-	m_session->ProcessPacket([this](PACKET_HEADER* data)->bool {
-		return this->ProcessPacket(data);
+	m_session->ProcessPacket(tickCount, [this](const uint64_t& tick, PACKET_HEADER* data)->bool {
+		return this->ProcessPacket(tick, data);
 	});
 }
-bool JCommander::ProcessPacket(PACKET_HEADER* data)
+bool JCommander::ProcessPacket(const uint64_t& tickCount, PACKET_HEADER* data)
 {
+	GetReplaySaveWorker().Push(tickCount, m_session->GetSessionID(), data->size, (char*)data);
 	switch (data->command)
 	{
 		case PACKET_COMMAND::PACKET_CS_LOGIN:
@@ -51,8 +53,7 @@ bool JCommander::ProcessPacket(PACKET_HEADER* data)
 			OnPacket(reinterpret_cast<PKS_CS_CHAT*>(data));
 			break;
 		default:
-			//err
-			//packet list 초기화
+			JLogger.Error("wrong packet (command:%d)", data->command);
 			return false;
 	}
 	return true;
@@ -73,7 +74,7 @@ void JCommander::OnPacket(PKS_CS_LOGOUT* packet)
 	//soket disconnect는 클라의 요청에 의해 이루어질 것이며, 해당 값은 IsDisconnected로 알 수 있다.
 	//JCommander는 IsDisconnected가 먼저 판별된 이후 아래 Close 함수에서 요청한 내용이 완료되었을 시 파괴할 수 있다.
 	//현재는 바로 파괴 가능한 상태
-	JLogger.Log("Logout : %s", m_commanderName);
+	JLogger.Log("Logout : %s", m_commanderName.c_str());
 	Close();
 }
 void JCommander::OnPacket(PKS_CS_CHAT* packet)
