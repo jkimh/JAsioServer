@@ -16,6 +16,6 @@
 - 일단 확실치 않기 때문에 기존의 코드에 영향을 주지 않는 범위에서 on/off할 수 있도록 함
 
 # server param
-없음 : 일반 서버 실행
--ReplayServer : packet_result.txt 를 읽어 재생하는 서버를 실행시킨다.
--ReplaySave : packet_result.txt 파일에 패킷을 기록한다
+- 없음 : 일반 서버 실행
+- -ReplayServer : packet_result.txt 를 읽어 재생하는 서버를 실행시킨다.
+- -ReplaySave : packet_result.txt 파일에 패킷을 기록한다
