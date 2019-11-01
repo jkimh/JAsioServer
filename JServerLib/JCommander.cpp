@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "stdafx.h"
 #include "JCommander.h"
 #include "JServer.h"
 #include "ISession.h"
@@ -69,6 +69,7 @@ void JCommander::OnPacket(PKS_CS_LOGIN* packet)
 	auto packetPtr = std::dynamic_pointer_cast<PACKET_HEADER>(std::make_shared<PKS_SC_LOGIN_ACK>(ack));
 	Send(packetPtr);
 }
+
 void JCommander::OnPacket(PKS_CS_LOGOUT* packet)
 {
 	//soket disconnect는 클라의 요청에 의해 이루어질 것이며, 해당 값은 IsDisconnected로 알 수 있다.

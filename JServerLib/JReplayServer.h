@@ -5,7 +5,7 @@ class JReplayServer :
 	public JServer
 {
 public:
-	JReplayServer(boost::asio::io_context& io_context, short port);
+	JReplayServer();
 	virtual void PreUpdateCommanders(uint64_t tickCount) override;
 
 private:

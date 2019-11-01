@@ -10,17 +10,11 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 
 #include <iostream>
-#include <fstream>
-#include <queue>
 #include <memory>
-#include <functional>
-#include <algorithm>
+#include <deque>
 #include <thread>
-#include <mutex>
-#include <array>
-#include <vector>
-#include <string>
-#include <optional>
+#include <chrono>
+#include <cstring>
 
 
 // reference additional headers your program requires here

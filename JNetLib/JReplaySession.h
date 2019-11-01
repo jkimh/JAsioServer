@@ -12,10 +12,6 @@ class JReplaySession : public ISession
 {
 public:
 	JReplaySession(std::vector<JReplay_Info>& packetList);
-	JReplaySession(const JReplaySession& session)
-	{
-
-	}
 	~JReplaySession();
 	virtual void PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data) override {}
 	virtual bool ProcessPacket(const uint64_t& tickCount, std::function<bool(const uint64_t&, PACKET_HEADER*)> packetProcess) override;

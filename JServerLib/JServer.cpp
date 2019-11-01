@@ -1,28 +1,16 @@
-#include "pch.h"
+#include "stdafx.h"
 #include "JServer.h"
 #include "JSession.h"
 #include "JCommander.h"
 #include "JLogger.h"
 
-JServer::JServer(boost::asio::io_context & io_context, short port)
-	: m_ioContext(io_context), m_acceptor(io_context, tcp::endpoint(tcp::v4(), port)), m_newSessionID(0)
+JServer::JServer() : m_newSessionID(0)
 {
 	m_isUsingPreCommanders.clear();
-	PostAccept();
 }
-
 JServer::~JServer()
 {
 }
-
-void JServer::PostAccept()
-{
-	std::shared_ptr<JSession> session = std::make_shared<JSession>(m_ioContext, ++m_newSessionID);
-	m_acceptor.async_accept(session->GetSocket(),
-		boost::bind(&JServer::handle_accept, this, session,
-			boost::asio::placeholders::error));
-}
-
 void JServer::PreUpdateCommanders(uint64_t tickCount)
 {
 	{
@@ -72,11 +60,11 @@ void JServer::UpdateCommanders(uint64_t tickCount)
 	{
 		auto& commander = *it;
 		if (commander->IsReadyDie())
-		{			
+		{
 			if (commander.use_count() == 1)
 			{
 				it = m_readyDieCommanders.erase(it);
-			} 
+			}
 			else
 			{
 				JLogger.Error("[Error] : commander ref count is not 1");
@@ -91,7 +79,22 @@ void JServer::BroadCastToCommander(std::shared_ptr<PACKET_HEADER>& packet)
 		commander->Send(packet);
 	}
 }
-void JServer::handle_accept(const std::shared_ptr<JSession>& session, const boost::system::error_code & error)
+
+JSocketServer::JSocketServer(boost::asio::io_context & io_context, short port)
+	: JServer::JServer(), m_ioContext(io_context), m_acceptor(io_context, tcp::endpoint(tcp::v4(), port))
+{
+	PostAccept();
+}
+
+void JSocketServer::PostAccept()
+{
+	std::shared_ptr<JSession> session = std::make_shared<JSession>(m_ioContext, ++m_newSessionID);
+	m_acceptor.async_accept(session->GetSocket(),
+		boost::bind(&JSocketServer::handle_accept, this, session,
+			boost::asio::placeholders::error));
+}
+
+void JSocketServer::handle_accept(const std::shared_ptr<JSession>& session, const boost::system::error_code & error)
 {
 	if (!error)
 	{

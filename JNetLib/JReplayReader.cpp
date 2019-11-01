@@ -39,14 +39,6 @@ void JReplayReader::LoadReplayInfo(const char* filePath)
 	}
 }
 
-std::vector<JReplay_Info>* JReplayReader::GetPacketInfoList(uint32_t sessionID)
-{
-	auto it = m_packetInfoListBySessionID.find(sessionID);
-	if(it == m_packetInfoListBySessionID.end())
-		return nullptr;
-	return &it->second;
-}
-
 std::vector<JReplay_Info>& JReplayReader::GetPacketInfoListByIdx(uint32_t index)
 {
 	return std::next(m_packetInfoListBySessionID.begin(), index)->second;

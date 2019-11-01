@@ -38,12 +38,12 @@ int main(int argc, char* argv[])
 	if (isReplayServer)
 	{
 		GetReplayReader().LoadReplayInfo("packet_result.txt");
-		std::shared_ptr<JServer> server = std::dynamic_pointer_cast<JServer>(std::make_shared<JReplayServer>(ioContext, 9001));
+		std::shared_ptr<JServer> server = std::dynamic_pointer_cast<JServer>(std::make_shared<JReplayServer>());
 		serverThread = new std::thread(std::bind(&ServerLogicThread, server));
 	}
 	else
 	{
-		std::shared_ptr<JServer> server = std::make_shared<JServer>(ioContext, 9001);
+		std::shared_ptr<JServer> server = std::dynamic_pointer_cast<JServer>(std::make_shared<JSocketServer>(ioContext, 9001));
 		serverThread = new std::thread(std::bind(&ServerLogicThread, server));
 	}
 	std::thread constextThread(boost::bind(&boost::asio::io_context::run, &ioContext));

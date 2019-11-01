@@ -1,10 +1,10 @@
-#include "pch.h"
+#include "stdafx.h"
 #include "JReplayServer.h"
 #include "JReplayReader.h"
 #include "JReplaySession.h"
 #include "JCommander.h"
 
-JReplayServer::JReplayServer(boost::asio::io_context& io_context, short port) : JServer::JServer(io_context, port)
+JReplayServer::JReplayServer() : JServer::JServer()
 {
 	size_t listCount = GetReplayReader().GetPacketInfoListCount();
 	for (size_t i = 0; i < listCount; i++)
