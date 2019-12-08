@@ -16,9 +16,15 @@ void JTestSession::PostSend(const bool & isImmediately, const size_t & size, std
 	m_sendQue.push(data);
 }
 
-bool JTestSession::ProcessPacket(const uint64_t & tickCount, std::function<bool(const uint64_t&, PACKET_HEADER*)> packetProcess)
+bool JTestSession::ProcessPacket(const JTickClass& tick, std::function<bool(const JTickClass&, PACKET_HEADER*)> packetProcess)
 {
-	return false;
+	auto it = m_recvMap.find(tick.tickCount);
+	if (it != m_recvMap.end())
+	{
+		packetProcess(tick, it->second.get());
+		m_recvMap.erase(it);
+	}
+	return true;
 }
 
 bool JTestSession::IsDisconnected()
@@ -31,7 +37,12 @@ uint32_t JTestSession::GetSessionID()
 	return uint32_t();
 }
 
-std::shared_ptr<PACKET_HEADER> JTestSession::GetLastSendPacket()
+void JTestSession::AddRecvPacket(uint64_t tickCount, std::unique_ptr<PACKET_HEADER> packet)
+{
+	m_recvMap.insert({ tickCount, std::move(packet) });
+}
+
+std::shared_ptr<PACKET_HEADER> JTestSession::PopLastSendPacket()
 {
 	if(m_sendQue.empty())
 		return nullptr;

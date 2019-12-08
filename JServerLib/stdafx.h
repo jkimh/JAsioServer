@@ -15,6 +15,10 @@
 #include <thread>
 #include <chrono>
 #include <cstring>
+#include <array>
+#include <optional>
+
+#include "Vector3.h"
 
 
 // reference additional headers your program requires here

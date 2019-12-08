@@ -159,14 +159,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="JCharacter.h" />
     <ClInclude Include="JCommander.h" />
+    <ClInclude Include="JCommanderCommand.h" />
+    <ClInclude Include="JPlayerChar.h" />
     <ClInclude Include="JReplayServer.h" />
     <ClInclude Include="JServer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="JCharacter.cpp" />
     <ClCompile Include="JCommander.cpp" />
+    <ClCompile Include="JCommanderCommand.cpp" />
+    <ClCompile Include="JCommander_Packet.cpp" />
+    <ClCompile Include="JPlayerChar.cpp" />
     <ClCompile Include="JReplayServer.cpp" />
     <ClCompile Include="JServer.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -175,6 +182,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -51,6 +51,12 @@ void JSession::PostSend(const bool& isImmediately, const size_t& size, std::shar
 	);
 }
 
+std::shared_ptr<PACKET_HEADER> JSession::PopLastSendPacket()
+{
+	JLogger.Error("cannot use in JSession class");
+	return std::shared_ptr<PACKET_HEADER>();
+}
+
 void JSession::handle_write(const boost::system::error_code& error, size_t bytes_transferred)
 {
 	if (error)
@@ -86,7 +92,7 @@ char* JSession::ResizeBuffer(char* buffer, size_t beforeSize, size_t afterSize)
 	return tempBuffer;
 }
 
-bool JSession::ProcessPacket(const uint64_t& tickCount, std::function<bool(const uint64_t&, PACKET_HEADER*)> packetProcess)
+bool JSession::ProcessPacket(const JTickClass& tick, std::function<bool(const JTickClass&, PACKET_HEADER*)> packetProcess)
 {
 	int copySize = 0;
 	//lock을 최소화 하기 위해 버퍼를 하나 더 두어 복사한다.
@@ -129,7 +135,7 @@ bool JSession::ProcessPacket(const uint64_t& tickCount, std::function<bool(const
 		PACKET_HEADER* header = (PACKET_HEADER*)&m_packetRecvProcessBuffer[readData];
 		if (header->size <= remainPacketData)
 		{
-			if (!packetProcess(tickCount, reinterpret_cast<PACKET_HEADER*>(header)))
+			if (!packetProcess(tick, reinterpret_cast<PACKET_HEADER*>(header)))
 			{
 				return false;
 			}

@@ -11,7 +11,7 @@ JServer::JServer() : m_newSessionID(0)
 JServer::~JServer()
 {
 }
-void JServer::PreUpdateCommanders(uint64_t tickCount)
+void JServer::PreUpdateCommanders(const JTickClass& tick)
 {
 	{
 		//한번만 시도해보고 이미 사용중이면 다음 프레임에 진행한다.
@@ -32,14 +32,14 @@ void JServer::PreUpdateCommanders(uint64_t tickCount)
 		m_isUsingPreCommanders.clear(std::memory_order_release);
 	}
 }
-void JServer::ProcessPacket(uint64_t tickCount)
+void JServer::ProcessPacket(const JTickClass& tick)
 {
 	for (auto commander : m_commanders)
 	{
-		commander->ProcessPacket(tickCount);
+		commander->ProcessPacket(tick);
 	}
 }
-void JServer::UpdateCommanders(uint64_t tickCount)
+void JServer::UpdateCommanders(const JTickClass& tick)
 {
 	for (auto it = m_commanders.begin(); it != m_commanders.end(); )
 	{

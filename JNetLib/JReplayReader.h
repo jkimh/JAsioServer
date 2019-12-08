@@ -6,8 +6,9 @@ class JReplayReader
 public:
 	JReplayReader();
 	~JReplayReader();
-
+	
 	void LoadReplayInfo(const char* filePath);
+	void LoadReplayInfo(const std::vector<JReplay_Info>& packetList);
 	std::vector<JReplay_Info>& GetPacketInfoListByIdx(uint32_t index);
 	size_t GetPacketInfoListCount();
 

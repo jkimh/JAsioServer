@@ -22,9 +22,10 @@ public:
 	char* ResizeBuffer(char* buffer, size_t beforeSize, size_t afterSize);
 
 	virtual void PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data) override;
-	virtual bool ProcessPacket(const uint64_t& tickCount, std::function<bool(const uint64_t&, PACKET_HEADER*)> packetProcess) override;
+	virtual bool ProcessPacket(const JTickClass& tick, std::function<bool(const JTickClass&, PACKET_HEADER*)> packetProcess) override;
 	virtual bool IsDisconnected() override  { return m_isDisconnected; }
 	virtual uint32_t GetSessionID() override  { return m_sessionID; }
+	virtual std::shared_ptr<PACKET_HEADER> PopLastSendPacket() override;
 private:
 	void handle_write(const boost::system::error_code& error, size_t bytes_transferred);
 	void handle_read(const boost::system::error_code& error, size_t bytes_transferred);

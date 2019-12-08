@@ -163,6 +163,8 @@
     <ClInclude Include="JPacket.h" />
     <ClInclude Include="JReplayReader.h" />
     <ClInclude Include="JReplaySaveWorker.h" />
+    <ClInclude Include="JReplaySaveWorkerForTest.h" />
+    <ClInclude Include="JReplaySaveWorkerMgr.h" />
     <ClInclude Include="JReplaySession.h" />
     <ClInclude Include="JSCPacket.h" />
     <ClInclude Include="JSession.h" />
@@ -172,6 +174,8 @@
   <ItemGroup>
     <ClCompile Include="JReplayReader.cpp" />
     <ClCompile Include="JReplaySaveWorker.cpp" />
+    <ClCompile Include="JReplaySaveWorkerForTest.cpp" />
+    <ClCompile Include="JReplaySaveWorkerMgr.cpp" />
     <ClCompile Include="JReplaySession.cpp" />
     <ClCompile Include="JSession.cpp" />
     <ClCompile Include="stdafx.cpp">

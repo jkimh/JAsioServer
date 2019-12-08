@@ -4,10 +4,12 @@
 #include "pch.h"
 #include "JServer.h"
 #include "JLogger.h"
-#include "JReplaySaveWorker.h"
+#include "JReplaySaveWorkerMgr.h"
 #include "JReplayReader.h"
 #include "JReplayServer.h"
+#include "JTickClass.h"
 
+using namespace JSharedLib;
 using boost::asio::ip::tcp;
 void ServerLogicThread(std::shared_ptr<JServer>& server);
 int main(int argc, char* argv[])
@@ -29,6 +31,7 @@ int main(int argc, char* argv[])
 
 	if (useSavePacketForReplay)
 	{
+		GetReplaySaveWorker().Init();
 		GetReplaySaveWorker().SetFileName("packet_result.txt");
 		GetReplaySaveWorker().RunThread();
 	}
@@ -71,25 +74,22 @@ void ServerLogicThread(std::shared_ptr<JServer>& server)
 	UINT64 lastTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	double nsPerTick = 1000000000 / 12.0f; // 12«¡∑π¿”
 
-	int ticks = 0;
-	int frames = 0;
-	int tickCount = 0;
+	//uint64_t ticks = 0;
+	//uint64_t lastTimer = lastTime;
 
-	//UINT64 lastTimer = lastTime;
+	JTickClass tick;
 	double delta = 0;
 	while (1)
-	{
-		UINT64 now = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	{		
+		uint64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 		delta += (now - lastTime) / nsPerTick;
 		lastTime = now;
 		while (delta >= 1)
 		{
-			ticks++;
-			tickCount++;
-
-			server->PreUpdateCommanders(tickCount);
-			server->ProcessPacket(tickCount);
-			server->UpdateCommanders(tickCount);
+			tick.Update();
+			server->PreUpdateCommanders(tick);
+			server->ProcessPacket(tick);
+			server->UpdateCommanders(tick);
 
 			delta--;
 		}

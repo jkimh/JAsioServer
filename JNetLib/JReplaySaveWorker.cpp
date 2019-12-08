@@ -1,7 +1,37 @@
 #include "stdafx.h"
 #include "JReplaySaveWorker.h"
 #include "JLogger.h"
-
+#include "JSharedFunc.h"
+	
+std::vector<char> JReplay_Info::Serialize(const JReplay_Info& info)
+{
+	std::vector<char> result;
+	std::string infos = std::to_string(info.tickCount) + "|" + std::to_string(info.sessionID).c_str() + "|"; //1|2|buffer
+	result.insert(result.end(), infos.begin(), infos.end());
+	result.insert(result.end(), info.packetBuffer.begin(), info.packetBuffer.end());
+	return result;
+}
+JReplay_Info JReplay_Info::DeSerialize(const std::string& buffer)
+{
+	JReplay_Info info;
+	auto strList = JSharedFunc::SplitString(buffer, '|');
+	if (strList.size() != 3)
+	{
+		if (buffer != "")
+		{
+			JLogger.Error("wrong format (%s)", strList[0].c_str());
+		}
+		return { 0,0, {} };
+	}
+	info.tickCount = static_cast<uint64_t>(std::atoi(strList[0].c_str()));
+	info.sessionID = static_cast<uint32_t>(std::atoi(strList[1].c_str()));
+	info.packetBuffer.insert(info.packetBuffer.end(), strList[2].begin(), strList[2].end());
+	return info;
+}
+bool JReplay_Info::operator==(bool b)
+{
+	return b == ((tickCount == 0) && (sessionID == 0));
+}
 bool operator<(JReplay_Info a, JReplay_Info b)
 {
 	return a.tickCount < b.tickCount;
@@ -10,17 +40,11 @@ bool operator>(JReplay_Info a, JReplay_Info b)
 {
 	return a.tickCount > b.tickCount;
 }
-JReplaySaveWorker& GetReplaySaveWorker()
-{
-	static JReplaySaveWorker worker;
-	return worker;
-}
 
 JReplaySaveWorker::JReplaySaveWorker() : m_end(false), m_saveFileName("temp.txt"), m_workerThread(nullptr), m_isRunning(false)
 {
 
 }
-
 
 JReplaySaveWorker::~JReplaySaveWorker()
 {

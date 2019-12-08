@@ -28,9 +28,9 @@ void JReplayReader::LoadReplayInfo(const char* filePath)
 	{
 		std::getline(inf, line);
 		auto replayInfo = JReplay_Info::DeSerialize(line);
-		if (!replayInfo)
+		if (replayInfo == false)
 			continue;
-		m_packetInfoListBySessionID[replayInfo.value().sessionID].push_back(replayInfo.value());
+		m_packetInfoListBySessionID[replayInfo.sessionID].push_back(replayInfo);
 	}
 	inf.close();
 	for (auto it : m_packetInfoListBySessionID)
@@ -39,6 +39,13 @@ void JReplayReader::LoadReplayInfo(const char* filePath)
 	}
 }
 
+void JReplayReader::LoadReplayInfo(const std::vector<JReplay_Info>& packetList)
+{
+	for (auto replayInfo : packetList)
+	{
+		m_packetInfoListBySessionID[replayInfo.sessionID].push_back(replayInfo);
+	}
+}
 std::vector<JReplay_Info>& JReplayReader::GetPacketInfoListByIdx(uint32_t index)
 {
 	return std::next(m_packetInfoListBySessionID.begin(), index)->second;

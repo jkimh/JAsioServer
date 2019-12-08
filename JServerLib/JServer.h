@@ -2,20 +2,22 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include "JSCPacket.h"
+#include "JTickClass.h"
 
 using boost::asio::ip::tcp;
 class JSession;
 class JCommander;
-
+using namespace JSharedLib;
 class JServer : public std::enable_shared_from_this<JServer>
 {
 public:
 	JServer();
 	~JServer();
-	void ProcessPacket(uint64_t tickCount);
-	void UpdateCommanders(uint64_t tickCount);
-	virtual void PreUpdateCommanders(uint64_t tickCount);
+	void ProcessPacket(const JTickClass& tick);
+	void UpdateCommanders(const JTickClass& tick);
+	virtual void PreUpdateCommanders(const JTickClass& tick);
 	void BroadCastToCommander(std::shared_ptr<PACKET_HEADER>& packet);
+	size_t GetCommanderCount() { return m_commanders.size(); }
 protected:
 	std::vector<std::shared_ptr<JCommander>> m_preCommanders;
 	std::atomic_flag m_isUsingPreCommanders;
