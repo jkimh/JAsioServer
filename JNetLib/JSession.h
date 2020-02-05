@@ -21,7 +21,7 @@ public:
 	void PostReceive();
 	char* ResizeBuffer(char* buffer, size_t beforeSize, size_t afterSize);
 
-	virtual void PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data) override;
+	virtual void PostSend(const bool& isImmediately, const size_t& size, const std::shared_ptr<PACKET_HEADER>& data) override;
 	virtual bool ProcessPacket(const JTickClass& tick, std::function<bool(const JTickClass&, PACKET_HEADER*)> packetProcess) override;
 	virtual bool IsDisconnected() override  { return m_isDisconnected; }
 	virtual uint32_t GetSessionID() override  { return m_sessionID; }

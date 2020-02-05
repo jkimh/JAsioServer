@@ -16,8 +16,9 @@ public:
 	void ProcessPacket(const JTickClass& tick);
 	void UpdateCommanders(const JTickClass& tick);
 	virtual void PreUpdateCommanders(const JTickClass& tick);
-	void BroadCastToCommander(std::shared_ptr<PACKET_HEADER>& packet);
+	void BroadCastToCommander(const std::shared_ptr<PACKET_HEADER>& packet);
 	size_t GetCommanderCount() { return m_commanders.size(); }
+	void UpdateView();
 protected:
 	std::vector<std::shared_ptr<JCommander>> m_preCommanders;
 	std::atomic_flag m_isUsingPreCommanders;

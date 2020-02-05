@@ -11,7 +11,7 @@ JTestSession::~JTestSession()
 {
 }
 
-void JTestSession::PostSend(const bool & isImmediately, const size_t & size, std::shared_ptr<PACKET_HEADER>& data)
+void JTestSession::PostSend(const bool & isImmediately, const size_t & size, const std::shared_ptr<PACKET_HEADER>& data)
 {
 	m_sendQue.push(data);
 }

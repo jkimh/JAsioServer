@@ -51,7 +51,7 @@ void JServer::UpdateCommanders(const JTickClass& tick)
 			it = m_commanders.erase(it);
 			continue;
 		}
-		commander->Update();
+		commander->Update(tick);
 		it++;
 
 	}
@@ -72,11 +72,18 @@ void JServer::UpdateCommanders(const JTickClass& tick)
 		}
 	}
 }
-void JServer::BroadCastToCommander(std::shared_ptr<PACKET_HEADER>& packet)
+void JServer::BroadCastToCommander(const std::shared_ptr<PACKET_HEADER>& packet)
 {
 	for (auto commander : m_commanders)
 	{
 		commander->Send(packet);
+	}
+}
+void JServer::UpdateView()
+{
+	for (auto commander : m_commanders)
+	{
+		commander->UpdateViews(m_commanders);
 	}
 }
 

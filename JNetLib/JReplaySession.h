@@ -13,7 +13,7 @@ class JReplaySession : public ISession
 public:
 	JReplaySession(std::vector<JReplay_Info>& packetList);
 	~JReplaySession();
-	virtual void PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data) override;
+	virtual void PostSend(const bool& isImmediately, const size_t& size, const std::shared_ptr<PACKET_HEADER>& data) override;
 	virtual bool ProcessPacket(const JTickClass& tick, std::function<bool(const JTickClass&, PACKET_HEADER*)> packetProcess) override;
 	virtual bool IsDisconnected() override { return false; };
 	virtual uint32_t GetSessionID() override { return m_sessionID; };

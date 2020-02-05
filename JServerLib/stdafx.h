@@ -17,8 +17,11 @@
 #include <cstring>
 #include <array>
 #include <optional>
-
+#include <unordered_map>
+#include <map>
 #include "Vector3.h"
+#include "JTickClass.h"
+#include "JPacket.h"
 
 
 // reference additional headers your program requires here

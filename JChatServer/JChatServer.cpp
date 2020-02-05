@@ -90,7 +90,7 @@ void ServerLogicThread(std::shared_ptr<JServer>& server)
 			server->PreUpdateCommanders(tick);
 			server->ProcessPacket(tick);
 			server->UpdateCommanders(tick);
-
+			server->UpdateView();
 			delta--;
 		}
 		try

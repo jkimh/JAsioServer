@@ -32,7 +32,7 @@ void JSession::PostReceive()
 			boost::asio::placeholders::bytes_transferred));
 }
 
-void JSession::PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data)
+void JSession::PostSend(const bool& isImmediately, const size_t& size, const std::shared_ptr<PACKET_HEADER>& data)
 {
 	if (!isImmediately)
 	{

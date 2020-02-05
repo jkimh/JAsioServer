@@ -7,7 +7,7 @@ public:
 	~JTestSession();
 
 	// Inherited via ISession
-	virtual void PostSend(const bool & isImmediately, const size_t & size, std::shared_ptr<PACKET_HEADER>& data) override;
+	virtual void PostSend(const bool & isImmediately, const size_t & size, const std::shared_ptr<PACKET_HEADER>& data) override;
 	virtual bool ProcessPacket(const JTickClass & tickCount, std::function<bool(const JTickClass&, PACKET_HEADER*)> packetProcess) override;
 	virtual bool IsDisconnected() override;
 	virtual uint32_t GetSessionID() override;

@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /JChatServer/LOG_Server
 /JChatServer/ClassDiagram.cd
+/JChatServer/packet_result.txt

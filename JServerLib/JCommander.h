@@ -2,36 +2,44 @@
 #include "JSCPacket.h"
 #include "JTickClass.h"
 using namespace JSharedLib;
+using namespace std;
 class JServer;
 class ISession;
 class JCommanderCommand;
 class JPlayerChar;
-class JCommander
+class JCommander : public std::enable_shared_from_this<JCommander>
 {
 public:
-	JCommander(const std::shared_ptr<ISession>& session, std::shared_ptr<JServer>& server);
+	JCommander(const shared_ptr<ISession>& session, shared_ptr<JServer>& server);
 	~JCommander(); 
 	void Init(const char* name);
 	void ProcessPacket(const JTickClass& tick);
 	bool ProcessPacket(const JTickClass& tick, PACKET_HEADER* data);
-	void Update();
-	void Send(std::shared_ptr<PACKET_HEADER>& packet);
+	void Update(const JTickClass& tick);
+	void Send(const shared_ptr<PACKET_HEADER>& packet);
+	void Send(const shared_ptr<PACKET_HEADER>& packet, int size);
 	bool IsReadyDie();
 	bool IsDisConnected();
 	void Close();
-	std::shared_ptr<ISession>& GetSession() { return m_session;	};
+	shared_ptr<ISession>& GetSession() { return m_session;	};
+	void BroadCast_ToZoneServer(const shared_ptr<PACKET_HEADER>& packet);
+	const Vector3& GetPosition();
+	void UpdateViews(const vector<shared_ptr<JCommander>>& commanderList);
+	const string& GetCommanderName() { return m_commanderName; }
 
 private:
 	void OnPacket(PKS_CS_LOGIN* packet);
 	void OnPacket(PKS_CS_LOGOUT* packet);
 	void OnPacket(PKS_CS_CHAT* packet);
+	void OnPacket(PKS_CS_MOVE* packet);
 
 private:
-	std::shared_ptr<ISession> m_session;
-	std::weak_ptr<JServer> m_server;
-	std::shared_ptr<JCommanderCommand> m_processCommand;
-	std::shared_ptr<JPlayerChar> m_char;
-	std::string m_commanderName;
+	shared_ptr<ISession> m_session;
+	weak_ptr<JServer> m_server;
+	shared_ptr<JCommanderCommand> m_processCommand;
+	shared_ptr<JPlayerChar> m_char;
+	vector<weak_ptr<JCommander>> m_views; 
+	string m_commanderName;
 	bool m_isLogout;
 };
 

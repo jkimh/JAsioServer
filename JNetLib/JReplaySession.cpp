@@ -35,7 +35,7 @@ bool JReplaySession::ProcessPacket(const JTickClass& tick, std::function<bool(co
 	return true;
 }
 
-void JReplaySession::PostSend(const bool& isImmediately, const size_t& size, std::shared_ptr<PACKET_HEADER>& data)
+void JReplaySession::PostSend(const bool& isImmediately, const size_t& size, const std::shared_ptr<PACKET_HEADER>& data)
 {
 	if (!m_isSaveSendQue)
 		return;

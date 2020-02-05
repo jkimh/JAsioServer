@@ -8,6 +8,8 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Numerics;
+using System.Linq;
 
 namespace JClientBot
 {
@@ -18,7 +20,10 @@ namespace JClientBot
         PACKET_SC_LOGIN_ACK,
         PACKET_CS_LOGOUT,
         PACKET_CS_CHAT,
-        PACKET_SC_CHAT
+        PACKET_SC_CHAT,
+        PACKET_CS_MOVE,
+        PACKET_SC_MOVE,
+        PACKET_SC_VIEW
     };
 
     [Serializable]
@@ -103,8 +108,49 @@ namespace JClientBot
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         [FieldOffset(0)] public char[] chat = new char[128];
     };
+
+    [Serializable]
+    [StructLayout(LayoutKind.Explicit)]
+    public class PKS_CS_MOVE : PACKET_HEADER
+    {
+        [FieldOffset(0)] public Vector3 dest;
+    };
+    
+    [Serializable]
+    [StructLayout(LayoutKind.Explicit)]
+    public class PKS_SC_MOVE : PACKET_HEADER
+    {
+        [FieldOffset(0)] public Vector3 dest;
+    };
+
+    [Serializable]
+    [StructLayout(LayoutKind.Explicit)]
+    public class PKS_SC_VIEW : PACKET_HEADER
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        [FieldOffset(0)] public char[] commanderID1 = new char[32];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        [FieldOffset(32)] public char[] commanderID2 = new char[32];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        [FieldOffset(64)] public char[] commanderID3 = new char[32];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        [FieldOffset(96)] public char[] commanderID4 = new char[32];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        [FieldOffset(128)] public char[] commanderID5 = new char[32];
+        [FieldOffset(160)] public Vector3 dest1;
+        [FieldOffset(172)] public Vector3 dest2;
+        [FieldOffset(184)] public Vector3 dest3;
+        [FieldOffset(196)] public Vector3 dest4;
+        [FieldOffset(208)] public Vector3 dest5;
+    };
     public class Client : INotifyPropertyChanged
     {
+        public Client()
+        {
+            Random r = new Random();
+            position.X = r.Next(0, 300);
+            position.Y = r.Next(0, 300);
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -116,6 +162,20 @@ namespace JClientBot
         private string error;
         private string chat;
         private int chatcount = 0;
+        private Vector3 position;
+        private ClientViewList clientViewList;
+
+        public ClientViewList ViewList
+        {
+            get { return clientViewList; }
+            set
+            {
+                if (value == clientViewList)
+                    return;
+                clientViewList = value;
+                OnPropertyChanged("ViewList");
+            }
+        }
 
         public string Name
         {
@@ -187,10 +247,48 @@ namespace JClientBot
                 OnPropertyChanged("ChatCount");
             }
         }
-        private Socket socket;
-        private byte[] data = new byte[1024];
-        private int size = 1024;
 
+        public Vector3 Position
+        {
+            get { return position; }
+            set
+            {
+                if (value == position)
+                    return;
+                position = value;
+                OnPropertyChanged("Position");
+                OnPropertyChanged("PositionX");
+                OnPropertyChanged("PositionY");
+            }
+        }
+
+        public float PositionX
+        {
+            get { return position.X; }
+            set
+            {
+                if (value == position.X)
+                    return;
+                position.X = value;
+                OnPropertyChanged("PositionX");
+            }
+        }
+
+        public float PositionY
+        {
+            get { return position.Y; }
+            set
+            {
+                if (value == position.Y)
+                    return;
+                position.Y = value;
+                OnPropertyChanged("PositionY");
+            }
+        }
+        private Socket socket;
+        private byte[] data = new byte[2048];
+        private int size = 2048;
+        public object lockObject = new object();
         public void Connect(string _ID)
         {
             Socket newSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -269,6 +367,157 @@ namespace JClientBot
                         this.ChatCount++;
                     }
                     break;
+                case PACKET_COMMAND.PACKET_SC_MOVE:
+                    {
+                        var packet = (PKS_SC_MOVE)PACKET_HEADER.Deserialize(data, typeof(PKS_SC_MOVE));
+                        this.Position = packet.dest;
+                    }
+                    break;
+                case PACKET_COMMAND.PACKET_SC_VIEW:
+                    {
+                        var packet = (PKS_SC_VIEW)PACKET_HEADER.Deserialize(data, typeof(PKS_SC_VIEW));
+                        lock (lockObject)
+                        {
+                            if (ViewList == null)
+                                break;
+                            foreach (var view in ViewList)
+                            {
+                                view.IsUpdate = false;
+                            }
+                            var name = new string(packet.commanderID1).Split('\0')[0];
+                            if (name != "None")
+                            {
+                                bool isFind = false;
+                                foreach (var view in ViewList)
+                                {
+                                    if (view.Name == name)
+                                    {
+                                        view.PositionX = packet.dest1.X;
+                                        view.PositionY = packet.dest1.Y;
+                                        view.IsUpdate = true;
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
+                                if (!isFind)
+                                {
+                                    var view = new ClientView(packet.dest1.X, packet.dest1.Y, name);
+                                    ViewList.Add(view);
+                                }
+                            }
+
+
+                            name = new string(packet.commanderID2).Split('\0')[0];
+                            if (name != "None")
+                            {
+                                bool isFind = false;
+                                foreach (var view in ViewList)
+                                {
+                                    if (view.Name == name)
+                                    {
+                                        view.PositionX = packet.dest2.X;
+                                        view.PositionY = packet.dest2.Y;
+                                        view.IsUpdate = true;
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
+                                if (!isFind)
+                                {
+                                    ViewList.Add(new ClientView(packet.dest2.X, packet.dest2.Y, name));
+                                }
+                            }
+                            name = new string(packet.commanderID3).Split('\0')[0];
+                            if (name != "None")
+                            {
+                                bool isFind = false;
+                                foreach (var view in ViewList)
+                                {
+                                    if (view.Name == name)
+                                    {
+                                        view.PositionX = packet.dest3.X;
+                                        view.PositionY = packet.dest3.Y;
+                                        view.IsUpdate = true;
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
+                                if (!isFind)
+                                {
+                                    ViewList.Add(new ClientView(packet.dest3.X, packet.dest3.Y, name));
+                                }
+                            }
+
+                            name = new string(packet.commanderID4).Split('\0')[0];
+                            if (name != "None")
+                            {
+                                bool isFind = false;
+                                foreach (var view in ViewList)
+                                {
+                                    if (view.Name == name)
+                                    {
+                                        view.PositionX = packet.dest4.X;
+                                        view.PositionY = packet.dest4.Y;
+                                        view.IsUpdate = true;
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
+                                if (!isFind)
+                                {
+                                    ViewList.Add(new ClientView(packet.dest4.X, packet.dest4.Y, name));
+                                }
+                            }
+
+                            name = new string(packet.commanderID5).Split('\0')[0];
+                            if (name != "None")
+                            {
+                                bool isFind = false;
+                                foreach (var view in ViewList)
+                                {
+                                    if (view.Name == name)
+                                    {
+                                        view.PositionX = packet.dest5.X;
+                                        view.PositionY = packet.dest5.Y;
+                                        view.IsUpdate = true;
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
+                                if (!isFind)
+                                {
+                                    ViewList.Add(new ClientView(packet.dest5.X, packet.dest5.Y, name));
+                                }
+                            }
+                            foreach (var view in ViewList.ToList())
+                            {
+                                if (!view.IsUpdate)
+                                {
+                                    ViewList.Remove(view);
+                                }
+                            }
+                        }
+                       
+                        /*
+
+                        if (new string(packet.commanderID2).Split('\0')[0] == "")
+                        {
+                            break;
+                        }
+                        clientViewList.Add(new ClientView(packet.dest2.X, packet.dest2.Y, new string(packet.commanderID2).Split('\0')[0]));
+
+
+                        if (new string(packet.commanderID3).Split('\0')[0] == "")
+                        {
+                            break;
+                        }
+                        clientViewList.Add(new ClientView(packet.dest3.X, packet.dest3.Y, new string(packet.commanderID3).Split('\0')[0]));
+                        */
+
+
+                    }
+                    break;
+
                 default:
                     this.Error = "wrong packet command";
                     break;

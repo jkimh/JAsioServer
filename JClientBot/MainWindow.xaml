@@ -5,30 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JClientBot"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="830">
+        Title="MainWindow" Height="750" Width="900">
     <Window.Resources>
         <local:ClientList x:Key="MyListKey" />
+        <local:ClientViewList x:Key="ViewList" /> 
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
-            <RowDefinition />
+            <RowDefinition/>
+            <RowDefinition Height="300"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
             <Label x:Name="ID_Label" Content="ID" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <TextBox x:Name="ID_Text" TextWrapping="Wrap" Text="Test" VerticalAlignment="Center" Width="150" Margin="10,0,0,0"/>
             <Label x:Name="Count_Label" Content="Count" VerticalAlignment="Center" Margin="10,0,0,0"/>
-            <TextBox x:Name="Count_Text" TextWrapping="Wrap" Text="10" VerticalAlignment="Center" Width="150" Margin="10,0,0,0" PreviewTextInput="Count_Text_PreviewTextInput"/>
-            <Button x:Name="Login_Button" Content="Login" Width="75" Margin="20,0,0,0" VerticalAlignment="Center" Click="ID_Button_Click"/>
+            <TextBox x:Name="Count_Text" TextWrapping="Wrap" Text="50" VerticalAlignment="Center" Width="150" Margin="10,0,0,0" PreviewTextInput="Count_Text_PreviewTextInput"/>
+            <Button x:Name="Login_Button" Content="Login" Width="75" Margin="70,0,0,0" VerticalAlignment="Center" Click="ID_Button_Click"/>
             <Button x:Name="Logout_Button" Content="Logout" Width="75" Margin="20,0,0,0" VerticalAlignment="Center" Click="Logout_Button_Click"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
             <Label x:Name="Chat_Label" Content="ID" VerticalAlignment="Center" Margin="10,0,0,0"/>
             <TextBox x:Name="Chat_Text" TextWrapping="Wrap" Text="Test" VerticalAlignment="Center" Width="300" Margin="10,0,0,0"/>
             <Button x:Name="Chat_Button" Content="Chat" Width="75" Margin="10,0,0,0" VerticalAlignment="Center" Click="Chat_Button_Click"/>
+            <Button x:Name="RandomMove_Button" Content="RandomMove" Width="75" Margin="10,0,0,0" VerticalAlignment="Center" Click="RandomMove_Button_Click"/>
         </StackPanel>
-        <ListView Grid.Row="2" x:Name="listBox" ItemsSource="{Binding Source={StaticResource MyListKey}}">
+        <ListView Grid.Row="2" x:Name="listBox" VerticalAlignment="Top" ItemsSource="{Binding Source={StaticResource MyListKey}}">
             <ListView.View>
                 <GridView AllowsColumnReorder="True">
                     <GridViewColumn CellTemplate="{StaticResource FirstCell}" Width="30"/>
@@ -38,9 +41,76 @@
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Error}" Header="Error" Width="130" />
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Chat}" Header="Chat" Width="180" />
                     <GridViewColumn DisplayMemberBinding="{Binding Path=ChatCount}" Header="Count" Width="40" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Position}" Header="Position" Width="120" />
                 </GridView>
             </ListView.View>
 
         </ListView>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="전체"></TextBlock>
+            <TextBlock x:Name="SelectedClientName" Grid.Column="2" Text="개별"></TextBlock>
+            <ItemsControl x:Name="ItemControlAll" HorizontalAlignment="Left" Height="300" Width="300" Grid.Column="1" ItemsSource="{Binding Source={StaticResource MyListKey}}">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border BorderBrush="Black" BorderThickness="1" CornerRadius="0">
+                        <ItemsPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="Canvas.Left" Value="{Binding Path=PositionX}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Path=PositionY}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <Ellipse Name="ellipse" Height="10" Width="10" Fill="Silver"  MouseUp="Ellipse_MouseUp" Tag="{Binding Path=Name}"></Ellipse>
+                        <TextBlock Text="{Binding Path=Name}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+            <ItemsControl Height="300" Width="300" Grid.Column="3" HorizontalAlignment="Left" ItemsSource="{Binding Source={StaticResource ViewList}}">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border BorderBrush="Black" BorderThickness="1" CornerRadius="0">
+                        <ItemsPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="Canvas.Left" Value="{Binding Path=PositionX}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Path=PositionY}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <Ellipse Height="10" Width="10" Fill="Silver" />
+                        <TextBlock Text="{Binding Path=Name}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        </Grid>
     </Grid>
 </Window>

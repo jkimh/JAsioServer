@@ -7,12 +7,17 @@ public:
 	JCharacter();
 	~JCharacter();
 
-	virtual void Update();
+	virtual void Update(const JTickClass& tick);
 
 	void ReqMove(const Vector3& dest);
-	void Move(const Vector3& dest, float m_speed);
+	const Vector3& GetPosition()
+	{
+		return m_positionCur;
+	}
+protected:
+	virtual void Move(const Vector3& direction, float distance);
 
-private:
+protected:
 	Vector3 m_positionCur;
 	Vector3 m_positionDest;
 	Vector3 m_direction;

@@ -8,15 +8,21 @@ namespace JSharedLib
 		Vector3(float _x, float _y, float _z);
 		~Vector3();
 
-		Vector3 operator+(const Vector3& b);
-		Vector3 operator-(const Vector3& b);
+		float GetMagnitude();
+		std::string ToString();
 		float operator*(const Vector3& b);
 		bool operator==(const Vector3& b);
-		void operator=(const Vector3& b);
+		Vector3& operator=(const Vector3& b);
+		Vector3& operator+=(const Vector3& b);
+		Vector3& operator-=(const Vector3& b);
+		const Vector3 operator+(const Vector3& b);
+		const Vector3 operator-(const Vector3& b);
 		float x;
 		float y;
 		float z;
 	};
 
+	Vector3 Normalize(const Vector3& vector);
+	float CalDist(const Vector3& a, const Vector3& b);
 }
 
