@@ -51,21 +51,3 @@ void ThreadPool::EnqueueJob(std::function<void()> job)
 	}
 	m_cvJobs.notify_one();
 }
-
-template<class F, class ...Args>
-std::future<typename std::result_of<F(Args...)>::type> ThreadPool::EnqueueJob(F&& f, Args&& ...args)
-{
-	if (m_stopAll)
-	{
-		throw std::runtime_error("thread »ç¿ë ÁßÁö µÊ");
-	}
-	using job_result_type = typename std::result_of<F(Args...)>::type;
-	auto job = std::make_shared<std::packaged_task<job_result_type()>>(std::bind(f, args...));
-	std::future<job_result_type> job_result_future = job.get_future();
-	{
-		std::lock_guard<std::mutex> lock(m_mutexJobs);
-		m_jobs.push([job](){ (*job)(); });
-	}
-	m_cvJobs.notify_one();
-	return job_result_future;
-}

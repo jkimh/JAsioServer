@@ -1,0 +1,1 @@
+{"version":"0.2.0","configurations":[{"name":"JAsioServer: Debug JChatServer (x64)","type":"cppvsdbg","request":"launch","preLaunchTask":"Build JAsioServer: All (Debug x64)","program":"${workspaceFolder}\\..\\Bin\\JChatServer_Debug.exe","args":[],"cwd":"${workspaceFolder}\\..\\Bin","env":{"LOG_DIR":"${workspaceFolder}\\..\\Log"},"console":"integratedTerminal"}]}

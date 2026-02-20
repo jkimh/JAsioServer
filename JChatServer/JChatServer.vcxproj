@@ -23,32 +23,36 @@
     <ProjectGuid>{81E5D599-8548-45B5-A7E8-D9EF4EF65594}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>JChatServer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <BoostIncludeDir Condition="'$(BOOST_INCLUDE_DIR)'!=''">$(BOOST_INCLUDE_DIR)</BoostIncludeDir>
+    <BoostLibDir Condition="'$(BOOST_LIB_DIR)'!=''">$(BOOST_LIB_DIR)</BoostLibDir>
+    <BoostIncludeDir Condition="'$(BoostIncludeDir)'==''">C:\boost_1_71_0\boost_1_71_0</BoostIncludeDir>
+    <BoostLibDir Condition="'$(BoostLibDir)'==''">C:\boost_1_71_0\boost_1_71_0\stage\lib</BoostLibDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -72,20 +76,33 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\boost_1_71_0\boost_1_71_0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <OutDir>..\bin\Debug</OutDir>
+    <IncludePath>$(BoostIncludeDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <OutDir>..\..\Bin\</OutDir>
+    <IntDir>..\..\Obj\JAsioServer\JChatServer\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>JChatServer_$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\Bin\</OutDir>
+    <IntDir>..\..\Obj\JAsioServer\JChatServer\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>JChatServer_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\boost_1_71_0\boost_1_71_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\boost_1_71_0\boost_1_71_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <OutDir>..\..\Bin\</OutDir>
+    <IntDir>..\..\Obj\JAsioServer\JChatServer\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>JChatServer_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\boost_1_71_0\boost_1_71_0;$(IncludePath)</IncludePath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <OutDir>..\..\Bin\</OutDir>
+    <IntDir>..\..\Obj\JAsioServer\JChatServer\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>JChatServer_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -97,13 +114,13 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\JNetLib\;..\JSharedLib;..\JLogger;..\JServerLib;</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\boost_1_71_0\boost_1_71_0\stage\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>..\Debug\JNetLib.lib;..\Debug\JLogger.lib;..\Debug\JSharedLib.lib;..\Debug\JServerLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(BoostLibDir);..\..\Obj\JAsioServer\$(Platform)\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>JNetLib_$(Configuration).lib;JLogger_$(Configuration).lib;JSharedLib_$(Configuration).lib;JServerLib_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,12 +133,13 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\JNetLib\;..\JSharedLib;..\JLogger;..\JServerLib;</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\boost_1_71_0\boost_1_71_0\stage\lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BoostLibDir);..\..\Obj\JAsioServer\$(Platform)\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>JNetLib_$(Configuration).lib;JLogger_$(Configuration).lib;JSharedLib_$(Configuration).lib;JServerLib_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -136,14 +154,15 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\JNetLib\;..\JSharedLib;..\JLogger;..\JServerLib;</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\boost_1_71_0\boost_1_71_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BoostLibDir);..\..\Obj\JAsioServer\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>JNetLib_$(Configuration).lib;JLogger_$(Configuration).lib;JSharedLib_$(Configuration).lib;JServerLib_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -158,14 +177,15 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>..\JNetLib\;..\JSharedLib;..\JLogger;..\JServerLib;</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++20 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\boost_1_71_0\boost_1_71_0\stage\lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BoostLibDir);..\..\Obj\JAsioServer\$(Platform)\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>JNetLib_$(Configuration).lib;JLogger_$(Configuration).lib;JSharedLib_$(Configuration).lib;JServerLib_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

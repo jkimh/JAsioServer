@@ -14,7 +14,7 @@ using boost::asio::ip::tcp;
 void ServerLogicThread(std::shared_ptr<JServer>& server);
 int main(int argc, char* argv[])
 {
-	JLogger.Init("Server", "Log_Server", false);
+	JLogger.Init("Server", "JChatServer.log", false);
 	bool isReplayServer = false;
 	bool useSavePacketForReplay = false;
 	if (argc == 2)

@@ -11,7 +11,14 @@ namespace JSharedLib
 		float GetMagnitude();
 		std::string ToString();
 		float operator*(const Vector3& b);
-		bool operator==(const Vector3& b);
+		friend bool operator==(const Vector3& a, const Vector3& b)
+		{
+			return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
+		}
+		friend bool operator!=(const Vector3& a, const Vector3& b)
+		{
+			return !(a == b);
+		}
 		Vector3& operator=(const Vector3& b);
 		Vector3& operator+=(const Vector3& b);
 		Vector3& operator-=(const Vector3& b);

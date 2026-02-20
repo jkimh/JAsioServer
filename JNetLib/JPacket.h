@@ -1,5 +1,7 @@
 #pragma once
 #include <string.h>
+#include <cstdint>
+
 enum PACKET_COMMAND
 {
 	PACKET_CS_LOGIN,
@@ -12,14 +14,16 @@ enum PACKET_COMMAND
 	PACKET_SC_VIEW
 };
 
+#pragma pack(push, 1)
 struct PACKET_HEADER
 {
 	PACKET_HEADER() {}
-	PACKET_HEADER(PACKET_COMMAND _command, size_t _size)
+	PACKET_HEADER(PACKET_COMMAND _command, uint32_t _size)
 	{
 		command = _command;
 		size = _size;
 	}
 	PACKET_COMMAND command;
-	size_t size;
+	uint32_t size;
 };
+#pragma pack(pop)

@@ -69,7 +69,7 @@ void JReplaySaveWorker::Push(const uint64_t& tickCount, const uint32_t& sessionI
 		JReplay_Info newInfo;
 		newInfo.tickCount = tickCount;
 		newInfo.sessionID = sessionID;
-		newInfo.packetBuffer.insert(newInfo.packetBuffer.end(), &buffer[0], &buffer[buffersize - 1]);
+		newInfo.packetBuffer.insert(newInfo.packetBuffer.end(), &buffer[0], &buffer[buffersize]);
 		m_packetBufferInfos.push_back(newInfo);
 		m_cvBuffer.notify_one();
 	}

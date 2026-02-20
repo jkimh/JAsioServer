@@ -23,11 +23,6 @@ namespace JSharedLib
 	{
 		return x * b.x + y * b.y + z * b.z;
 	}
-	bool Vector3::operator==(const Vector3& b)
-	{
-		return (x == b.x) && (y == b.y) && (z == b.z);
-	}
-
 	Vector3& Vector3::operator=(const Vector3& b)
 	{
 		x = b.x;
